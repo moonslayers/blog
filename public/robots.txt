@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://moonslayers.github.io/blog/sitemap-index.xml

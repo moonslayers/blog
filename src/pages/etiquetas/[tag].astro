@@ -1,0 +1,53 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import PostCard from "../../components/PostCard.astro";
+import { getAllTags, getPublishedPosts, tagSlug } from "../../lib/posts";
+import { withBase } from "../../lib/url";
+
+export async function getStaticPaths() {
+  const tags = await getAllTags();
+  return tags.map((item) => ({
+    params: { tag: item.slug },
+    props: { tag: item.tag, slug: item.slug, count: item.count },
+  }));
+}
+
+const { tag, slug, count } = Astro.props;
+const posts = (await getPublishedPosts()).filter((post) =>
+  post.data.tags.some((t) => tagSlug(t) === slug),
+);
+---
+
+<BaseLayout title={`Etiqueta: ${tag}`}>
+  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <p
+      class="mono"
+      style="color: var(--ink-secondary); font-size: 0.8rem; letter-spacing: 0.05em; margin: 0 0 0.5rem;"
+    >
+      Etiqueta
+    </p>
+    <h1
+      class="serif"
+      style="font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem); font-weight: 500;"
+    >
+      {tag}
+    </h1>
+    <p style="color: var(--ink-secondary); margin: 0.5rem 0 2rem;">
+      {count} artículo{count === 1 ? "" : "s"}
+    </p>
+    {posts.length === 0 ? (
+      <p style="color: var(--ink-secondary);">
+        No hay artículos para esta etiqueta.
+      </p>
+    ) : (
+      <div style="display: flex; flex-direction: column; gap: 3rem; max-width: 720px;">
+        {posts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </div>
+    )}
+    <p style="margin-top: 3rem;">
+      <a href={withBase("/etiquetas/")}>Ver todas las etiquetas</a>
+    </p>
+  </section>
+</BaseLayout>

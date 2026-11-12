@@ -1,0 +1,27 @@
+---
+import { withBase } from "../../lib/url";
+
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <span class="mono">© {year} Jorge Marquez</span>
+    <ul class="site-footer__links">
+      <li>
+        <a href={withBase("/rss.xml")} class="site-footer__link">
+          RSS
+        </a>
+      </li>
+      <li>
+        <a
+          href="https://github.com/moonslayers"
+          class="site-footer__link"
+          rel="noopener"
+        >
+          GitHub
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>

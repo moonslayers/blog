@@ -1,0 +1,81 @@
+---
+interface Props {
+  url: string;
+  title: string;
+}
+
+const { url, title } = Astro.props;
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const xHref = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`;
+---
+
+<div class="share-links">
+  <a
+    href={xHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en X"
+  >
+    X
+  </a>
+  <a
+    href={linkedinHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en LinkedIn"
+  >
+    LinkedIn
+  </a>
+  <a
+    href={whatsappHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en WhatsApp"
+  >
+    WhatsApp
+  </a>
+  <button
+    type="button"
+    class="copy-link"
+    data-url={url}
+    aria-label="Copiar enlace"
+  >
+    <span class="copy-label">Copiar link</span>
+    <span class="copy-status" aria-live="polite" hidden>
+      Copiado
+    </span>
+  </button>
+</div>
+
+<script>
+  document.querySelectorAll(".copy-link").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const url = btn.getAttribute("data-url");
+      if (!url) return;
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "absolute";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        (document as any).execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      const label = btn.querySelector(".copy-label");
+      const status = btn.querySelector(".copy-status");
+      if (label) label.textContent = "Copiado";
+      if (status) (status as HTMLElement).hidden = false;
+      window.setTimeout(() => {
+        if (label) label.textContent = "Copiar link";
+        if (status) (status as HTMLElement).hidden = true;
+      }, 2000);
+    });
+  });
+</script>

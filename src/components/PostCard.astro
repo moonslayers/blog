@@ -1,0 +1,141 @@
+---
+import type { BlogPost } from "../lib/posts";
+import {
+  coverFor,
+  formatDate,
+  readingTime,
+  postPath,
+  tagSlug,
+} from "../lib/posts";
+import { withBase } from "../lib/url";
+
+interface Props {
+  post: BlogPost;
+  featured?: boolean;
+}
+
+const { post, featured = false } = Astro.props;
+const cover = coverFor(post);
+---
+
+<article class:list={["post-card", { "post-card--featured": featured }]}>
+  <a
+    href={postPath(post.id)}
+    class="post-card__cover"
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <img
+      src={cover.src}
+      alt={post.data.coverAlt ?? post.data.title}
+      loading="lazy"
+      width="1200"
+      height="630"
+    />
+  </a>
+  <div class="post-card__body">
+    <p class="post-card__meta mono">
+      <time datetime={post.data.date.toISOString()}>
+        {formatDate(post.data.date)}
+      </time>
+      <span aria-hidden="true">·</span>
+      <span>{readingTime(post.body)} min de lectura</span>
+    </p>
+    <h2 class="post-card__title serif">
+      <a href={postPath(post.id)}>{post.data.title}</a>
+    </h2>
+    <p class="post-card__desc">{post.data.description}</p>
+    {post.data.tags.length > 0 && (
+      <ul class="post-card__tags">
+        {post.data.tags.map((tag) => (
+          <li>
+            <a href={withBase(`/etiquetas/${tagSlug(tag)}/`)} class="tag-chip">
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</article>
+
+<style>
+  .post-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .post-card__cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    border: var(--border-thin);
+    background-color: var(--bg-surface);
+  }
+  .post-card__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .post-card__meta {
+    font-size: 0.8rem;
+    color: var(--ink-secondary);
+    letter-spacing: 0.02em;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0 0 0.5rem;
+  }
+  .post-card__title {
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.5rem;
+  }
+  .post-card__title a {
+    color: var(--ink-primary);
+    text-decoration: none;
+  }
+  .post-card__title a:hover {
+    color: var(--accent-terracotta);
+  }
+  .post-card__desc {
+    color: var(--ink-secondary);
+    margin: 0 0 0.75rem;
+  }
+  .post-card__tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .tag-chip {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border: var(--border-thin);
+    border-radius: var(--radius-sm);
+    color: var(--ink-secondary);
+    text-decoration: none;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .tag-chip:hover {
+    color: var(--accent-terracotta);
+    border-color: var(--accent-terracotta);
+  }
+  .post-card--featured .post-card__title {
+    font-size: clamp(1.625rem, 1.3rem + 1.4vw, 2.125rem);
+  }
+  .post-card--featured .post-card__cover {
+    border-color: var(--ink-primary);
+  }
+</style>

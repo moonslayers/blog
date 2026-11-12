@@ -1,0 +1,41 @@
+---
+import { SITE_TITLE } from "../../consts";
+import { withBase } from "../../lib/url";
+
+const nav = [
+  { href: withBase("/"), label: "Inicio" },
+  { href: withBase("/etiquetas/"), label: "Etiquetas" },
+  { href: withBase("/buscar/"), label: "Buscar" },
+  { href: withBase("/rss.xml"), label: "RSS" },
+];
+const portfolioHref = "https://moonslayers.github.io/new-portafolio/";
+---
+
+<header class="site-header">
+  <div class="site-header__bar">
+    <a href={withBase("/")} class="site-header__brand">
+      {SITE_TITLE}
+    </a>
+    <nav class="site-header__nav" aria-label="Navegación principal">
+      <ul>
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} class="site-header__link">
+              {item.label}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a
+            href={portfolioHref}
+            class="site-header__link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Portafolio
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>

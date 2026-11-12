@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SearchBox from "../components/SearchBox.astro";
+---
+
+<BaseLayout title="Buscar">
+  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <h1
+      class="serif"
+      style="font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem); font-weight: 500;"
+    >
+      Buscar
+    </h1>
+    <p style="color: var(--ink-secondary); margin: 0.5rem 0 2rem; max-width: var(--content-measure);">
+      Busca entre los artículos publicados por título, descripción o etiqueta.
+    </p>
+    <SearchBox />
+  </section>
+</BaseLayout>

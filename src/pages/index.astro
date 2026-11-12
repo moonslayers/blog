@@ -1,0 +1,112 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostCard from "../components/PostCard.astro";
+import { SITE_TITLE, SITE_TAGLINE } from "../consts";
+import { getPublishedPosts } from "../lib/posts";
+import { withBase } from "../lib/url";
+
+const posts = await getPublishedPosts();
+const shown = posts.slice(0, 2);
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_TAGLINE}>
+  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <header class="hero">
+      <h1 class="serif hero__wordmark">{SITE_TITLE}</h1>
+      <p class="hero__tagline mono">{SITE_TAGLINE}</p>
+      <p class="hero__intro">
+        Escribo sobre inteligencia artificial, software y tecnología emergente
+        desde la práctica: lo que funciona, lo que no y lo que todavía no tiene
+        consenso. Sin hype, con ejemplos verificables.
+      </p>
+      <nav class="hero__links" aria-label="Enlaces rápidos">
+        <a href={withBase("/rss.xml")}>RSS</a>
+        <a href={withBase("/buscar/")}>Buscar</a>
+        <a href={withBase("/etiquetas/")}>Etiquetas</a>
+      </nav>
+    </header>
+
+    <section class="posts" aria-labelledby="posts-heading">
+      <h2 id="posts-heading" class="serif posts__heading">
+        Artículos
+      </h2>
+      {shown.length === 0 ? (
+        <p class="posts__empty">
+          Todavía no hay artículos publicados. Vuelve pronto.
+        </p>
+      ) : (
+        <div class="posts__list">
+          {shown.map((post, index) => (
+            <PostCard post={post} featured={index === 0} />
+          ))}
+        </div>
+      )}
+    </section>
+
+    <p style="text-align: center; margin-top: 2rem;">
+      <a
+        href={withBase("/articulos/")}
+        class="mono"
+        style="font-size: 0.85rem; color: var(--accent-terracotta); text-decoration: none;"
+      >
+        Ver todos los artículos →
+      </a>
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    max-width: var(--content-measure);
+    margin: 0 auto 4rem;
+  }
+  .hero__wordmark {
+    font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0;
+  }
+  .hero__tagline {
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-secondary);
+    margin: 0.5rem 0 1.5rem;
+  }
+  .hero__intro {
+    color: var(--ink-primary);
+    margin: 0 0 1.5rem;
+  }
+  .hero__links {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .hero__links a {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent-terracotta);
+    text-decoration: none;
+  }
+  .hero__links a:hover {
+    text-decoration: underline;
+  }
+  .posts {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .posts__heading {
+    font-size: clamp(1.375rem, 1rem + 1.2vw, 1.75rem);
+    font-weight: 500;
+    margin: 0 0 1.5rem;
+  }
+  .posts__list {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .posts__empty {
+    color: var(--ink-secondary);
+  }
+</style>

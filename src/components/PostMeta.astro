@@ -1,0 +1,19 @@
+---
+import { formatDate } from "../lib/posts";
+
+interface Props {
+  date: Date;
+  readingTime: number;
+  author: string;
+}
+
+const { date, readingTime, author } = Astro.props;
+---
+
+<div class="post-meta mono">
+  <time datetime={date.toISOString()}>{formatDate(date)}</time>
+  <span aria-hidden="true"> · </span>
+  <span>{readingTime} min de lectura</span>
+  <span aria-hidden="true"> · </span>
+  <span>{author}</span>
+</div>

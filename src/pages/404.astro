@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SearchBox from "../components/SearchBox.astro";
+import { withBase } from "../lib/url";
+---
+
+<BaseLayout title="Página no encontrada">
+  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
+    <h1
+      class="serif"
+      style="font-size: clamp(2rem, 1.6rem + 2vw, 3rem); font-weight: 500;"
+    >
+      404
+    </h1>
+    <p style="margin-top: 1rem; color: var(--ink-secondary);">
+      La página que buscas no existe o fue movida.
+    </p>
+    <p style="margin-top: 1.5rem; display: flex; gap: 1.25rem; flex-wrap: wrap;">
+      <a href={withBase("/")}>Volver al inicio</a>
+      <a href={withBase("/etiquetas/")}>Ver etiquetas</a>
+    </p>
+    <div style="margin-top: 2.5rem; max-width: 720px;">
+      <SearchBox />
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,206 @@
+---
+import { withBase } from "../lib/url";
+
+interface Props {
+  id?: string;
+}
+
+const { id = "search" } = Astro.props;
+const inputId = `${id}-input`;
+const statusId = `${id}-status`;
+const resultsId = `${id}-results`;
+---
+
+<div
+  class="search-box"
+  data-search-box
+  data-index-url={withBase("/buscar-index.json")}
+>
+  <label for={inputId} class="search-box__label">
+    Buscar artículos
+  </label>
+  <input
+    id={inputId}
+    type="search"
+    class="search-box__input"
+    placeholder="Escribe una o varias palabras"
+    autocomplete="off"
+    spellcheck="false"
+  />
+  <p class="search-box__help">
+    La búsqueda es local: se comparan título, descripción y etiquetas. Todos los
+    términos deben coincidir.
+  </p>
+  <p
+    id={statusId}
+    class="search-box__status mono"
+    aria-live="polite"
+    role="status"
+  >
+    Escribe para buscar artículos.
+  </p>
+  <ul id={resultsId} class="search-box__results" role="list"></ul>
+</div>
+
+<script>
+  type Entry = {
+    title: string;
+    description: string;
+    tags: string[];
+    date: string;
+    readingTime: number;
+    url: string;
+    searchText: string;
+  };
+
+  function normalize(text: string): string {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+  }
+
+  const roots = document.querySelectorAll<HTMLElement>("[data-search-box]");
+  for (const root of roots) {
+    const indexUrl = root.dataset.indexUrl ?? "";
+    const input = root.querySelector<HTMLInputElement>("input[type='search']");
+    const status = root.querySelector<HTMLElement>("[aria-live='polite']");
+    const results = root.querySelector<HTMLUListElement>("ul[role='list']");
+
+    let entries: Entry[] = [];
+
+    fetch(indexUrl)
+      .then((response) => response.json())
+      .then((data: Entry[]) => {
+        entries = Array.isArray(data) ? data : [];
+      })
+      .catch(() => {
+        if (status)
+          status.textContent = "No se pudo cargar el índice de búsqueda.";
+      });
+
+    function render(matches: Entry[], query: string) {
+      if (!results || !status) return;
+      results.innerHTML = "";
+      if (query === "") {
+        status.textContent = "Escribe para buscar artículos.";
+        return;
+      }
+      if (matches.length === 0) {
+        status.textContent = `Sin resultados para «${query}».`;
+        return;
+      }
+      status.textContent = `${matches.length} resultado${matches.length === 1 ? "" : "s"}.`;
+      for (const entry of matches) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = entry.url;
+        a.className = "search-box__result";
+        const title = document.createElement("span");
+        title.className = "search-box__result-title serif";
+        title.textContent = entry.title;
+        const meta = document.createElement("span");
+        meta.className = "search-box__result-meta mono";
+        meta.textContent = `${new Date(entry.date).toLocaleDateString("es-MX", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          timeZone: "UTC",
+        })} · ${entry.readingTime} min`;
+        const desc = document.createElement("p");
+        desc.className = "search-box__result-desc";
+        desc.textContent = entry.description;
+        a.append(title, meta, desc);
+        li.append(a);
+        results.append(li);
+      }
+    }
+
+    input?.addEventListener("input", () => {
+      const query = input.value;
+      const terms = normalize(query).split(/\s+/).filter(Boolean);
+      if (terms.length === 0) {
+        render([], "");
+        return;
+      }
+      const matches = entries.filter((entry) =>
+        terms.every((term) => normalize(entry.searchText).includes(term)),
+      );
+      render(matches, query.trim());
+    });
+  }
+</script>
+
+<style>
+  .search-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-width: 720px;
+  }
+  .search-box__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-secondary);
+  }
+  .search-box__input {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 0.6rem 0.75rem;
+    border: var(--border-thin);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-surface);
+    color: var(--ink-primary);
+  }
+  .search-box__help {
+    font-size: 0.85rem;
+    color: var(--ink-secondary);
+    margin: 0;
+  }
+  .search-box__status {
+    font-size: 0.8rem;
+    color: var(--ink-secondary);
+    margin: 0;
+    min-height: 1.2em;
+  }
+  .search-box__results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .search-box__result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem;
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    background-color: var(--bg-surface);
+    text-decoration: none;
+    color: var(--ink-primary);
+    transition: border-color 0.2s ease;
+  }
+  .search-box__result:hover {
+    border-color: var(--accent-terracotta);
+  }
+  .search-box__result-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .search-box__result-meta {
+    font-size: 0.75rem;
+    color: var(--ink-secondary);
+  }
+  .search-box__result-desc {
+    font-size: 0.9rem;
+    color: var(--ink-secondary);
+    margin: 0.25rem 0 0;
+  }
+</style>
