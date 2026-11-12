@@ -8,7 +8,7 @@ export async function getStaticPaths() {
   const posts = await getPublishedPosts();
   return Promise.all(
     posts.map(async (post) => {
-      const { previous, next } = await getAdjacentPosts(post.id);
+      const { previous, next } = await getAdjacentPosts(post.id, posts);
       return {
         params: { slug: post.id },
         props: { post, previous, next },
