@@ -2,8 +2,13 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { withBase, absoluteUrl } from "./url";
 import { normalizeText, tagSlug, readingTime, isExternalUrl } from "./text";
+import { selectHomePosts } from "./home-posts";
+import type { HomePosts } from "./home-posts";
 
 export type BlogPost = CollectionEntry<"blog">;
+
+export type { HomePosts } from "./home-posts";
+export { selectHomePosts } from "./home-posts";
 
 export type SearchEntry = {
   title: string;
@@ -21,6 +26,11 @@ export async function getPublishedPosts(): Promise<BlogPost[]> {
     return data.draft !== true && data.date <= today;
   });
   return entries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+}
+
+export async function getHomePosts(): Promise<HomePosts> {
+  const posts = await getPublishedPosts();
+  return selectHomePosts(posts);
 }
 
 export async function getPostBySlug(

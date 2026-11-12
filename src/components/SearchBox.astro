@@ -19,14 +19,25 @@ const resultsId = `${id}-results`;
   <label for={inputId} class="search-box__label">
     Buscar artículos
   </label>
-  <input
-    id={inputId}
-    type="search"
-    class="search-box__input"
-    placeholder="Escribe una o varias palabras"
-    autocomplete="off"
-    spellcheck="false"
-  />
+  <div class="search-box__field">
+    <input
+      id={inputId}
+      type="search"
+      class="search-box__input"
+      placeholder="Escribe una o varias palabras"
+      autocomplete="off"
+      spellcheck="false"
+      enterkeyhint="search"
+    />
+    <button
+      type="button"
+      class="search-box__clear"
+      aria-label="Limpiar búsqueda"
+      hidden
+    >
+      ×
+    </button>
+  </div>
   <p class="search-box__help">
     La búsqueda es local: se comparan título, descripción y etiquetas. Todos los
     términos deben coincidir.
@@ -52,6 +63,7 @@ const resultsId = `${id}-results`;
   for (const root of roots) {
     const indexUrl = root.dataset.indexUrl ?? "";
     const input = root.querySelector<HTMLInputElement>("input[type='search']");
+    const clear = root.querySelector<HTMLButtonElement>(".search-box__clear");
     const status = root.querySelector<HTMLElement>("[aria-live='polite']");
     const results = root.querySelector<HTMLUListElement>("ul[role='list']");
 
@@ -104,7 +116,13 @@ const resultsId = `${id}-results`;
       }
     }
 
+    function syncClear() {
+      if (input && clear) clear.hidden = input.value.length === 0;
+    }
+
     input?.addEventListener("input", () => {
+      if (!input) return;
+      syncClear();
       const query = input.value;
       const terms = normalizeText(query).split(/\s+/).filter(Boolean);
       if (terms.length === 0) {
@@ -116,6 +134,25 @@ const resultsId = `${id}-results`;
       );
       render(matches, query.trim());
     });
+
+    clear?.addEventListener("click", () => {
+      if (!input) return;
+      input.value = "";
+      syncClear();
+      render([], "");
+      input.focus();
+    });
+
+    input?.addEventListener("keydown", (event) => {
+      if (!input) return;
+      if (event.key === "Escape" && input.value !== "") {
+        input.value = "";
+        syncClear();
+        render([], "");
+      }
+    });
+
+    syncClear();
   }
 </script>
 
@@ -133,25 +170,65 @@ const resultsId = `${id}-results`;
     text-transform: uppercase;
     color: var(--ink-secondary);
   }
+  .search-box__field {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+  }
   .search-box__input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
     font-family: var(--font-sans);
     font-size: 1rem;
-    padding: 0.6rem 0.75rem;
+    padding: 0.6rem 2.75rem 0.6rem 0.75rem;
     border: var(--border-thin);
     border-radius: var(--radius-sm);
     background-color: var(--bg-surface);
     color: var(--ink-primary);
   }
+  .search-box__clear {
+    position: absolute;
+    top: 50%;
+    right: 0.25rem;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--ink-secondary);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .search-box__clear[hidden] {
+    display: none;
+  }
+  .search-box__clear:hover {
+    color: var(--ink-primary);
+  }
+  .search-box__clear:focus-visible,
+  .search-box__result:focus-visible {
+    outline: 2px solid var(--accent-terracotta);
+    outline-offset: 2px;
+  }
   .search-box__help {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--ink-secondary);
     margin: 0;
   }
   .search-box__status {
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     color: var(--ink-secondary);
     margin: 0;
     min-height: 1.2em;
+    overflow-wrap: break-word;
   }
   .search-box__results {
     list-style: none;
@@ -165,6 +242,8 @@ const resultsId = `${id}-results`;
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-width: 0;
+    overflow-wrap: break-word;
     padding: 1rem;
     border: var(--border-thin);
     border-radius: var(--radius-md);
@@ -180,6 +259,7 @@ const resultsId = `${id}-results`;
     font-size: 1.125rem;
     font-weight: 500;
     line-height: 1.2;
+    overflow-wrap: break-word;
   }
   .search-box__result-meta {
     font-size: 0.75rem;
@@ -189,5 +269,6 @@ const resultsId = `${id}-results`;
     font-size: 0.9rem;
     color: var(--ink-secondary);
     margin: 0.25rem 0 0;
+    overflow-wrap: break-word;
   }
 </style>

@@ -7,6 +7,15 @@ export default defineConfig({
   site: "https://moonslayers.github.io",
   base: "/blog/",
   output: "static",
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+      defaultColor: false,
+    },
+  },
   integrations: [
     sitemap({
       filter: (page) => {

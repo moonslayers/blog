@@ -7,14 +7,9 @@ const tags = await getAllTags();
 ---
 
 <BaseLayout title="Etiquetas">
-  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
-    <h1
-      class="serif"
-      style="font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem); font-weight: 500;"
-    >
-      Etiquetas
-    </h1>
-    <p style="color: var(--ink-secondary); margin: 0.5rem 0 2rem;">
+  <section class="shell tags-index">
+    <h1 class="serif tags-index__title">Etiquetas</h1>
+    <p class="tags-index__subtitle">
       Todos los temas que aparecen en los artículos publicados.
     </p>
     {tags.length === 0 ? (
@@ -34,6 +29,18 @@ const tags = await getAllTags();
 </BaseLayout>
 
 <style>
+  .tags-index {
+    padding-top: var(--space-16);
+    padding-bottom: var(--space-16);
+  }
+  .tags-index__title {
+    font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem);
+    font-weight: 500;
+  }
+  .tags-index__subtitle {
+    color: var(--ink-secondary);
+    margin: 0.5rem 0 2rem;
+  }
   .tag-list {
     list-style: none;
     margin: 0;
@@ -42,28 +49,13 @@ const tags = await getAllTags();
     flex-wrap: wrap;
     gap: 0.75rem;
   }
-  .tag-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
-    padding: 0.35rem 0.7rem;
-    border: var(--border-thin);
-    border-radius: var(--radius-sm);
-    color: var(--ink-secondary);
-    text-decoration: none;
-    transition:
-      color 0.2s ease,
-      border-color 0.2s ease;
-  }
-  .tag-chip:hover {
-    color: var(--accent-terracotta);
-    border-color: var(--accent-terracotta);
-  }
-  .tag-chip__count {
-    font-size: 0.7rem;
-    color: var(--ink-secondary);
+  @media (max-width: 640px) {
+    .tags-index {
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-12);
+    }
+    .tags-index__subtitle {
+      margin-bottom: var(--space-6);
+    }
   }
 </style>

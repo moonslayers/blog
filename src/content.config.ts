@@ -21,6 +21,7 @@ const blog = defineCollection({
       coverAlt: z.string().optional(),
       author: z.string().default("Jorge Marquez"),
       draft: z.boolean().default(false),
+      featured: z.boolean().optional(),
       updated: z.coerce.date().optional(),
     })
     .refine(

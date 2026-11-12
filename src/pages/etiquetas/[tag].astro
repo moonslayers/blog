@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostCard from "../../components/PostCard.astro";
+import PostGrid from "../../components/PostGrid.astro";
 import { getAllTags, getPublishedPosts, tagSlug } from "../../lib/posts";
 import type { BlogPost } from "../../lib/posts";
 import { withBase } from "../../lib/url";
@@ -32,35 +32,70 @@ const { tag, count, posts } = Astro.props;
 ---
 
 <BaseLayout title={`Etiqueta: ${tag}`}>
-  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
-    <p
-      class="mono"
-      style="color: var(--ink-secondary); font-size: 0.8rem; letter-spacing: 0.05em; margin: 0 0 0.5rem;"
-    >
-      Etiqueta
-    </p>
-    <h1
-      class="serif"
-      style="font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem); font-weight: 500;"
-    >
-      {tag}
-    </h1>
-    <p style="color: var(--ink-secondary); margin: 0.5rem 0 2rem;">
+  <section class="shell tag">
+    <p class="mono tag__kicker">Etiqueta</p>
+    <h1 class="serif tag__title">{tag}</h1>
+    <p class="tag__count">
       {count} artículo{count === 1 ? "" : "s"}
     </p>
     {posts.length === 0 ? (
-      <p style="color: var(--ink-secondary);">
-        No hay artículos para esta etiqueta.
-      </p>
+      <p class="tag__empty">No hay artículos para esta etiqueta.</p>
     ) : (
-      <div style="display: flex; flex-direction: column; gap: 3rem; max-width: 720px;">
-        {posts.map((post) => (
-          <PostCard post={post} />
-        ))}
-      </div>
+      <PostGrid posts={posts} />
     )}
-    <p style="margin-top: 3rem;">
+    <p class="tag__back">
       <a href={withBase("/etiquetas/")}>Ver todas las etiquetas</a>
     </p>
   </section>
 </BaseLayout>
+
+<style>
+  .tag {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  .tag__kicker {
+    color: var(--ink-secondary);
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem;
+  }
+  .tag__title {
+    font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem);
+    font-weight: 500;
+  }
+  .tag__count {
+    color: var(--ink-secondary);
+    margin: 0.5rem 0 2rem;
+  }
+  .tag__empty {
+    color: var(--ink-secondary);
+  }
+  .tag__back {
+    margin-top: 3rem;
+  }
+  .tag__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-secondary);
+    text-decoration: none;
+  }
+  .tag__back a:hover {
+    color: var(--accent-terracotta);
+  }
+  @media (max-width: 640px) {
+    .tag {
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-12);
+    }
+    .tag__count {
+      margin-bottom: var(--space-6);
+    }
+    .tag__back {
+      margin-top: var(--space-8);
+    }
+  }
+</style>

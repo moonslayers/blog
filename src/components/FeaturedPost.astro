@@ -1,0 +1,131 @@
+---
+import type { BlogPost } from "../lib/posts";
+import { coverFor, formatDate, readingTime, postPath } from "../lib/posts";
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const cover = coverFor(post);
+---
+
+<article class="featured-post">
+  <div class="featured-post__body">
+    <p class="featured-post__eyebrow">Destacado</p>
+    <h2 class="featured-post__title">
+      <a href={postPath(post.id)}>{post.data.title}</a>
+    </h2>
+    <p class="featured-post__deck">{post.data.description}</p>
+    <p class="featured-post__meta">
+      <time datetime={post.data.date.toISOString()}>
+        {formatDate(post.data.date)}
+      </time>
+      <span aria-hidden="true">|</span>
+      <span>{readingTime(post.body)} min de lectura</span>
+    </p>
+  </div>
+  <a
+    class="featured-post__cover"
+    href={postPath(post.id)}
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    <img
+      src={cover.src}
+      alt={post.data.coverAlt ?? post.data.title}
+      width="1200"
+      height="630"
+      loading="eager"
+      decoding="async"
+    />
+  </a>
+</article>
+
+<style>
+  .featured-post {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--space-8);
+    align-items: start;
+    border-top: 2px solid var(--accent-terracotta);
+    padding-top: var(--space-6);
+  }
+  .featured-post__body {
+    min-width: 0;
+  }
+  .featured-post__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-terracotta);
+    margin: 0 0 var(--space-3);
+  }
+  .featured-post__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.75rem, 1.35rem + 1.7vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-3);
+    overflow-wrap: break-word;
+  }
+  .featured-post__title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 120ms ease-in-out;
+  }
+  .featured-post__title a:hover {
+    color: var(--accent-terracotta);
+  }
+  .featured-post__deck {
+    margin: 0 0 var(--space-4);
+    line-height: 1.65;
+    overflow-wrap: break-word;
+  }
+  .featured-post__meta {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--ink-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem var(--space-2);
+    align-items: center;
+    margin: 0;
+  }
+  .featured-post__cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: var(--border-thin);
+    background: var(--bg-surface);
+  }
+  .featured-post__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 768px) {
+    .featured-post {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+    }
+    .featured-post__cover {
+      order: -1;
+    }
+    .featured-post__title {
+      font-size: clamp(1.5rem, 1.3rem + 1vw, 1.875rem);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .featured-post__title a {
+      transition-duration: 0ms;
+    }
+  }
+</style>

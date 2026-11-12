@@ -1,112 +1,195 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import PostCard from "../components/PostCard.astro";
+import FeaturedPost from "../components/FeaturedPost.astro";
+import PostRow from "../components/PostRow.astro";
+import TopicStrip from "../components/TopicStrip.astro";
 import { SITE_TITLE, SITE_TAGLINE } from "../consts";
-import { getPublishedPosts } from "../lib/posts";
+import { getAllTags, getHomePosts } from "../lib/posts";
 import { withBase } from "../lib/url";
 
-const posts = await getPublishedPosts();
-const shown = posts.slice(0, 2);
+const { featured, rest } = await getHomePosts();
+const tags = await getAllTags();
+const latest = rest.slice(0, 2);
+const showArchive = rest.length > 0;
+const isEmpty = featured === null && rest.length === 0;
+const hasLatest = latest.length > 0;
+const hasTags = tags.length > 0;
 ---
 
 <BaseLayout title={SITE_TITLE} description={SITE_TAGLINE}>
-  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
-    <header class="hero">
-      <h1 class="serif hero__wordmark">{SITE_TITLE}</h1>
-      <p class="hero__tagline mono">{SITE_TAGLINE}</p>
-      <p class="hero__intro">
-        Escribo sobre inteligencia artificial, software y tecnología emergente
-        desde la práctica: lo que funciona, lo que no y lo que todavía no tiene
-        consenso. Sin hype, con ejemplos verificables.
-      </p>
-      <nav class="hero__links" aria-label="Enlaces rápidos">
-        <a href={withBase("/rss.xml")}>RSS</a>
-        <a href={withBase("/buscar/")}>Buscar</a>
-        <a href={withBase("/etiquetas/")}>Etiquetas</a>
-      </nav>
+  <div class="shell home">
+    <header class="home__hero">
+      <p class="mono home__kicker">{SITE_TAGLINE}</p>
+      <h1 class="serif home__title">Orquestando ideas, delegando propósitos</h1>
     </header>
 
-    <section class="posts" aria-labelledby="posts-heading">
-      <h2 id="posts-heading" class="serif posts__heading">
-        Artículos
-      </h2>
-      {shown.length === 0 ? (
-        <p class="posts__empty">
-          Todavía no hay artículos publicados. Vuelve pronto.
-        </p>
-      ) : (
-        <div class="posts__list">
-          {shown.map((post, index) => (
-            <PostCard post={post} featured={index === 0} />
+    {featured !== null && (
+      <section class="home__featured" aria-label="Artículo destacado">
+        <FeaturedPost post={featured} />
+      </section>
+    )}
+
+    {isEmpty && (
+      <p class="home__empty">
+        Todavía no hay artículos publicados. Vuelve pronto.
+      </p>
+    )}
+
+    {hasLatest && (
+      <section class="home__latest" aria-labelledby="latest-heading">
+        <h2 id="latest-heading" class="serif home__section-title">
+          Últimos artículos
+        </h2>
+        <div class="home__rows">
+          {latest.map((post) => (
+            <PostRow post={post} />
           ))}
         </div>
-      )}
-    </section>
+        {showArchive && (
+          <p class="home__archive">
+            <a class="mono home__archive-link" href={withBase("/articulos/")}>
+              Ver todos los artículos →
+            </a>
+          </p>
+        )}
+      </section>
+    )}
 
-    <p style="text-align: center; margin-top: 2rem;">
-      <a
-        href={withBase("/articulos/")}
-        class="mono"
-        style="font-size: 0.85rem; color: var(--accent-terracotta); text-decoration: none;"
-      >
-        Ver todos los artículos →
-      </a>
-    </p>
-  </section>
+    {hasTags && (
+      <div class="home__meta-band">
+        <TopicStrip tags={tags} limit={6} heading="Temas" />
+        <section class="home__about" aria-labelledby="about-heading">
+          <h2 id="about-heading" class="serif home__meta-title">
+            Sobre este blog
+          </h2>
+          <p class="home__about-text">
+            Notas de campo sobre IA y software: lo que pruebo, lo que rompe y lo
+            que vale la pena.
+          </p>
+        </section>
+      </div>
+    )}
+  </div>
 </BaseLayout>
 
 <style>
-  .hero {
-    max-width: var(--content-measure);
-    margin: 0 auto 4rem;
+  .home {
+    padding: var(--space-16) 0;
   }
-  .hero__wordmark {
+  .home__hero {
+    max-width: 960px;
+    margin: 0 auto var(--space-12);
+  }
+  .home__kicker {
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    color: var(--ink-secondary);
+    margin: 0 0 var(--space-3);
+  }
+  .home__title {
     font-size: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
     font-weight: 500;
     letter-spacing: -0.02em;
     line-height: 1.05;
+    max-width: 20ch;
+    text-wrap: balance;
     margin: 0;
   }
-  .hero__tagline {
-    font-size: 0.85rem;
-    letter-spacing: 0.05em;
+  .home__featured {
+    max-width: 960px;
+    margin: 0 auto var(--space-12);
+  }
+  .home__empty {
+    max-width: 960px;
+    margin: 0 auto var(--space-12);
     color: var(--ink-secondary);
-    margin: 0.5rem 0 1.5rem;
   }
-  .hero__intro {
-    color: var(--ink-primary);
-    margin: 0 0 1.5rem;
+  .home__latest {
+    max-width: 960px;
+    margin-inline: auto;
+    margin-bottom: var(--space-12);
   }
-  .hero__links {
-    display: flex;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-  }
-  .hero__links a {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.04em;
-    color: var(--accent-terracotta);
-    text-decoration: none;
-  }
-  .hero__links a:hover {
-    text-decoration: underline;
-  }
-  .posts {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-  .posts__heading {
+  .home__section-title {
     font-size: clamp(1.375rem, 1rem + 1.2vw, 1.75rem);
     font-weight: 500;
-    margin: 0 0 1.5rem;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0 0 var(--space-6);
   }
-  .posts__list {
+  .home__rows {
     display: flex;
     flex-direction: column;
-    gap: 3rem;
   }
-  .posts__empty {
+  .home__archive {
+    margin: var(--space-6) 0 0;
+  }
+  .home__archive-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.875rem;
+    color: var(--accent-terracotta);
+    text-decoration: none;
+    transition: color 120ms ease-in-out;
+  }
+  .home__archive-link:hover {
+    text-decoration: underline;
+  }
+  .home__meta-band {
+    max-width: 960px;
+    margin-inline: auto;
+    border-top: var(--border-thin);
+    padding-top: var(--space-8);
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+  .home__meta-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0 0 var(--space-3);
+  }
+  .home__about-text {
+    margin: 0;
     color: var(--ink-secondary);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  @media (max-width: 1024px) {
+    .home__meta-band {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 640px) {
+    .home {
+      padding: var(--space-8) 0 var(--space-12);
+    }
+    .home__hero {
+      margin-bottom: var(--space-6);
+    }
+    .home__featured {
+      margin-bottom: var(--space-8);
+    }
+    .home__latest {
+      margin-bottom: var(--space-8);
+    }
+    .home__section-title {
+      margin-bottom: var(--space-4);
+    }
+    .home__archive {
+      margin-top: var(--space-4);
+    }
+    .home__meta-band {
+      padding-top: var(--space-6);
+      gap: var(--space-6);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .home__archive-link {
+      transition-duration: 0ms;
+    }
   }
 </style>

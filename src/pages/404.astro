@@ -5,22 +5,54 @@ import { withBase } from "../lib/url";
 ---
 
 <BaseLayout title="Página no encontrada" noindex>
-  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
-    <h1
-      class="serif"
-      style="font-size: clamp(2rem, 1.6rem + 2vw, 3rem); font-weight: 500;"
-    >
-      404
-    </h1>
-    <p style="margin-top: 1rem; color: var(--ink-secondary);">
+  <section class="shell not-found-page">
+    <h1 class="serif not-found__title">404</h1>
+    <p class="not-found__message">
       La página que buscas no existe o fue movida.
     </p>
-    <p style="margin-top: 1.5rem; display: flex; gap: 1.25rem; flex-wrap: wrap;">
+    <p class="not-found__links">
       <a href={withBase("/")}>Volver al inicio</a>
       <a href={withBase("/etiquetas/")}>Ver etiquetas</a>
     </p>
-    <div style="margin-top: 2.5rem; max-width: 720px;">
+    <div class="not-found__search">
       <SearchBox />
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .shell.not-found-page {
+    padding-top: 2rem;
+    padding-bottom: 2.5rem;
+  }
+  .not-found__title {
+    font-size: clamp(2rem, 1.6rem + 2vw, 3rem);
+    font-weight: 500;
+  }
+  .not-found__message {
+    margin-top: 1rem;
+    color: var(--ink-secondary);
+  }
+  .not-found__links {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .not-found__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .not-found__search {
+    margin-top: 2.5rem;
+    max-width: 720px;
+  }
+  @media (min-width: 768px) {
+    .shell.not-found-page {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+</style>

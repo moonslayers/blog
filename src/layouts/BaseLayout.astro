@@ -54,8 +54,18 @@ const faviconSvg = withBase("/favicon.svg");
 <!doctype html>
 <html lang="es">
   <head>
+    <script is:inline>
+      try {
+        const t = localStorage.getItem("blog:theme");
+        if (t === "light" || t === "dark")
+          document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
     <meta name="generator" content={Astro.generator} />
     <title>{documentTitle}</title>
     {description && <meta name="description" content={description} />}
@@ -85,7 +95,7 @@ const faviconSvg = withBase("/favicon.svg");
       Saltar al contenido
     </a>
     <Header />
-    <main id="main">
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <Footer />

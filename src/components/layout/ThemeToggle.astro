@@ -1,0 +1,154 @@
+---
+import { Monitor, Moon, Sun } from "@lucide/astro";
+
+const ICON_SIZE = 17;
+const ICON_STROKE_WIDTH = 1.5;
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Tema del sistema. Cambiar a claro"
+  title="Tema del sistema. Cambiar a claro"
+>
+  <span class="theme-toggle__icon" data-theme-icon="light">
+    <Sun size={ICON_SIZE} stroke-width={ICON_STROKE_WIDTH} aria-hidden="true" />
+  </span>
+  <span class="theme-toggle__icon" data-theme-icon="dark">
+    <Moon
+      size={ICON_SIZE}
+      stroke-width={ICON_STROKE_WIDTH}
+      aria-hidden="true"
+    />
+  </span>
+  <span class="theme-toggle__icon" data-theme-icon="system">
+    <Monitor
+      size={ICON_SIZE}
+      stroke-width={ICON_STROKE_WIDTH}
+      aria-hidden="true"
+    />
+  </span>
+</button>
+
+<script>
+  type Theme = "light" | "dark" | "system";
+
+  const STORAGE_KEY = "blog:theme";
+  const ORDER: Theme[] = ["light", "dark", "system"];
+  const LABELS: Record<Theme, string> = {
+    light: "Tema claro. Cambiar a oscuro",
+    dark: "Tema oscuro. Cambiar a sistema",
+    system: "Tema del sistema. Cambiar a claro",
+  };
+
+  function parseTheme(value: string | null): Theme {
+    if (value === "light" || value === "dark" || value === "system") {
+      return value;
+    }
+    return "system";
+  }
+
+  function readTheme(): Theme {
+    try {
+      return parseTheme(localStorage.getItem(STORAGE_KEY));
+    } catch {
+      return "system";
+    }
+  }
+
+  let currentTheme: Theme = readTheme();
+
+  function renderTheme(theme: Theme): void {
+    if (theme === "system") {
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", theme);
+    }
+  }
+
+  function paintButton(button: HTMLButtonElement, theme: Theme): void {
+    button.setAttribute("aria-label", LABELS[theme]);
+    button.setAttribute("title", LABELS[theme]);
+  }
+
+  function paintAll(theme: Theme): void {
+    const buttons = document.querySelectorAll("[data-theme-toggle]");
+    for (let i = 0; i < buttons.length; i++) {
+      const button = buttons[i];
+      if (button instanceof HTMLButtonElement) {
+        paintButton(button, theme);
+      }
+    }
+  }
+
+  function applyTheme(theme: Theme): void {
+    currentTheme = theme;
+    renderTheme(theme);
+    paintAll(theme);
+  }
+
+  const buttons = document.querySelectorAll("[data-theme-toggle]");
+  for (let i = 0; i < buttons.length; i++) {
+    const button = buttons[i];
+    if (!(button instanceof HTMLButtonElement)) continue;
+    paintButton(button, currentTheme);
+    button.addEventListener("click", () => {
+      const next = ORDER[(ORDER.indexOf(currentTheme) + 1) % ORDER.length];
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {}
+      applyTheme(next);
+    });
+  }
+
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", () => {
+    if (currentTheme !== "system") return;
+    renderTheme("system");
+    paintAll("system");
+  });
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== STORAGE_KEY) return;
+    applyTheme(parseTheme(event.newValue));
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: var(--border-thin);
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--ink-secondary);
+    cursor: pointer;
+    transition:
+      color 120ms ease-in-out,
+      border-color 120ms ease-in-out;
+  }
+  .theme-toggle:hover {
+    color: var(--ink-primary);
+    border-color: var(--ink-secondary);
+  }
+  .theme-toggle__icon {
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  html[data-theme="light"] .theme-toggle__icon[data-theme-icon="light"] {
+    display: inline-flex;
+  }
+  html[data-theme="dark"] .theme-toggle__icon[data-theme-icon="dark"] {
+    display: inline-flex;
+  }
+  html:not([data-theme]) .theme-toggle__icon[data-theme-icon="system"] {
+    display: inline-flex;
+  }
+</style>

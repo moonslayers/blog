@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import PostCard from "../../components/PostCard.astro";
+import PostGrid from "../../components/PostGrid.astro";
 import { getPublishedPosts } from "../../lib/posts";
 import { withBase } from "../../lib/url";
 import type { BlogPost } from "../../lib/posts";
@@ -31,40 +31,22 @@ const { page } = Astro.props;
       : "Artículos"
   }
 >
-  <section class="shell" style="padding-top: 4rem; padding-bottom: 4rem;">
-    <p style="margin-bottom: 2rem;">
-      <a
-        href={withBase("/")}
-        class="mono"
-        style="font-size: 0.8rem; color: var(--ink-secondary); text-decoration: none;"
-      >
+  <section class="shell archive">
+    <p class="archive__back">
+      <a href={withBase("/")} class="mono">
         ← Volver a la home
       </a>
     </p>
-    <h1
-      class="serif"
-      style="font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem); font-weight: 500;"
-    >
-      Artículos
-    </h1>
-    <p style="color: var(--ink-secondary); margin: 0.5rem 0 2rem;">
+    <h1 class="serif archive__title">Artículos</h1>
+    <p class="archive__subtitle">
       Todos los artículos publicados, del más reciente al más antiguo.
     </p>
     {page.data.length === 0 ? (
-      <p style="color: var(--ink-secondary);">
-        Todavía no hay artículos publicados.
-      </p>
+      <p class="archive__empty">Todavía no hay artículos publicados.</p>
     ) : (
-      <div style="display: flex; flex-direction: column; gap: 3rem; max-width: 720px;">
-        {page.data.map((post) => (
-          <PostCard post={post} />
-        ))}
-      </div>
+      <PostGrid posts={page.data} />
     )}
-    <nav
-      aria-label="Paginación"
-      style="margin-top: 3rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;"
-    >
+    <nav aria-label="Paginación" class="archive__pagination">
       <div>
         {page.url.prev && (
           <a href={page.url.prev} rel="prev" aria-label="Página anterior">
@@ -72,10 +54,7 @@ const { page } = Astro.props;
           </a>
         )}
       </div>
-      <p
-        class="mono"
-        style="font-size: 0.85rem; color: var(--ink-secondary); margin: 0;"
-      >
+      <p class="mono archive__page-info">
         Página {page.currentPage} de {page.lastPage}
       </p>
       <div>
@@ -88,3 +67,74 @@ const { page } = Astro.props;
     </nav>
   </section>
 </BaseLayout>
+
+<style>
+  .archive {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  .archive__back {
+    margin-bottom: 2rem;
+  }
+  .archive__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: 0.8rem;
+    color: var(--ink-secondary);
+    text-decoration: none;
+  }
+  .archive__back a:hover {
+    color: var(--accent-terracotta);
+  }
+  .archive__title {
+    font-size: clamp(1.875rem, 1.25rem + 2vw, 2.75rem);
+    font-weight: 500;
+  }
+  .archive__subtitle {
+    color: var(--ink-secondary);
+    margin: 0.5rem 0 2rem;
+  }
+  .archive__empty {
+    color: var(--ink-secondary);
+  }
+  .archive__pagination {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .archive__pagination a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-secondary);
+    text-decoration: none;
+  }
+  .archive__pagination a:hover {
+    color: var(--accent-terracotta);
+  }
+  .archive__page-info {
+    font-size: 0.85rem;
+    color: var(--ink-secondary);
+    margin: 0;
+  }
+  @media (max-width: 640px) {
+    .archive {
+      padding-top: var(--space-8);
+      padding-bottom: var(--space-12);
+    }
+    .archive__back {
+      margin-bottom: var(--space-4);
+    }
+    .archive__subtitle {
+      margin-bottom: var(--space-6);
+    }
+    .archive__pagination {
+      margin-top: var(--space-8);
+    }
+  }
+</style>

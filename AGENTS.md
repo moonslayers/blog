@@ -2,7 +2,7 @@
 
 ## Proyecto
 
-Blog personal en español de Jorge Marquez, publicado como GitHub Pages project page en `https://moonslayers.github.io/blog/`. Astro 7.4.7, output estático, sin backend, CMS, i18n ni comentarios.
+Blog personal en español de Jorge Marquez, publicado como GitHub Pages project page en `https://moonslayers.github.io/blog/`. Astro 7.4.x (manda `package.json`), output estático, sin backend, CMS, i18n ni comentarios.
 
 ## Convenciones
 
@@ -13,6 +13,8 @@ Blog personal en español de Jorge Marquez, publicado como GitHub Pages project 
 - No hacer commits salvo que se pidan.
 - No añadir frameworks de UI adicionales (React, Vue, Svelte, etc.).
 - No usar hash routing.
+- Iconos: `@lucide/astro` para acciones genéricas (trazo 1.5, `currentColor`, en build sin JS de cliente). Lucide v1 no incluye marcas: X, WhatsApp, LinkedIn y Facebook se dibujan con SVG inline monocromo de Simple Icons; LinkedIn ya no está en Simple Icons, así que se usa el path de la última versión que lo incluía.
+- Tema: clave `blog:theme` en `localStorage` (`"light" | "dark" | "system"`, ausente = sistema); se aplica con `data-theme="light" | "dark"` en `<html>` (sin atributo en modo sistema).
 
 ## Base path
 

@@ -28,15 +28,16 @@
 }
 
 :root {
-  --bg-paper: #f7f5f0;
-  --bg-surface: #ffffff;
-  --ink-primary: #1c1b19;
-  --ink-secondary: #6b6862;
-  --ink-light: #e5e3db;
-  --accent-terracotta: #c75b39;
-  --success-sage: #2e5a44;
-  --warning-mustard: #d9a05b;
-  --code-bg: #f0ede6;
+  color-scheme: light dark;
+  --bg-paper: light-dark(#f7f5f0, #141312);
+  --bg-surface: light-dark(#ffffff, #1c1b19);
+  --ink-primary: light-dark(#1c1b19, #f2efe8);
+  --ink-secondary: light-dark(#6b6862, #a8a39a);
+  --ink-light: light-dark(#e5e3db, #33302b);
+  --accent-terracotta: light-dark(#c75b39, #d97757);
+  --success-sage: light-dark(#2e5a44, #5a8a6e);
+  --warning-mustard: light-dark(#d9a05b, #e6b87a);
+  --code-bg: light-dark(#f0ede6, #24221f);
 
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -63,21 +64,12 @@
   --shell-measure: 1100px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-paper: #141312;
-    --bg-surface: #1c1b19;
-    --ink-primary: #f2efe8;
-    --ink-secondary: #a8a39a;
-    --ink-light: #33302b;
-    --accent-terracotta: #d97757;
-    --success-sage: #5a8a6e;
-    --warning-mustard: #e6b87a;
-    --code-bg: #24221f;
+[data-theme="light"] {
+  color-scheme: light;
+}
 
-    --border-thin: 1px solid var(--ink-light);
-    --border-strong: 1px solid var(--ink-primary);
-  }
+[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 * {
@@ -87,6 +79,11 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+#main:focus:not(:focus-visible) {
+  outline: none;
 }
 
 body {
@@ -113,6 +110,31 @@ body {
 }
 .serif {
   font-family: var(--font-serif);
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.625rem;
+  border: var(--border-thin);
+  border-radius: var(--radius-sm);
+  color: var(--ink-secondary);
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.tag-chip:hover {
+  color: var(--accent-terracotta);
+  border-color: var(--accent-terracotta);
+}
+.tag-chip__count {
+  color: var(--ink-secondary);
+  font-variant-numeric: tabular-nums;
 }
 
 .skip-link {
@@ -157,6 +179,13 @@ body {
   text-decoration: none;
   letter-spacing: -0.01em;
 }
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
 .site-header__nav ul {
   display: flex;
   gap: 1.25rem;
@@ -175,6 +204,92 @@ body {
 }
 .site-header__link:hover {
   color: var(--ink-primary);
+}
+.site-header__menu-button {
+  display: none;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: var(--border-thin);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition:
+    color 120ms ease-in-out,
+    border-color 120ms ease-in-out;
+}
+.site-header__menu-button:hover {
+  color: var(--ink-primary);
+  border-color: var(--ink-secondary);
+}
+.site-header__menu-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.site-header__menu-icon[data-menu-icon="open"] {
+  display: inline-flex;
+}
+.site-header[data-menu-open] .site-header__menu-icon[data-menu-icon="open"] {
+  display: none;
+}
+.site-header[data-menu-open] .site-header__menu-icon[data-menu-icon="close"] {
+  display: inline-flex;
+}
+
+@media (max-width: 768px) {
+  .site-header__bar {
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .site-header[data-menu-ready] .site-header__bar {
+    flex-wrap: nowrap;
+  }
+  .site-header__brand {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .site-header__actions {
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+  .site-header[data-menu-ready] .site-header__menu-button {
+    display: inline-flex;
+  }
+  .site-header[data-menu-ready] .site-header__nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-paper);
+    border-bottom: var(--border-thin);
+  }
+  .site-header[data-menu-ready][data-menu-open] .site-header__nav {
+    display: block;
+  }
+  .site-header[data-menu-ready] .site-header__nav ul {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.5rem 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .site-header[data-menu-ready] .site-header__link {
+    display: flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
 }
 
 .site-footer {
@@ -216,6 +331,33 @@ body {
   padding: 0 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .shell {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .site-footer {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .tag-chip {
+    position: relative;
+  }
+  .tag-chip::after {
+    content: "";
+    position: absolute;
+    inset: -0.625rem -0.25rem;
+  }
+  .site-footer__link {
+    position: relative;
+  }
+  .site-footer__link::after {
+    content: "";
+    position: absolute;
+    inset: -0.875rem -0.5rem;
+  }
+}
+
 .prose {
   max-width: var(--content-measure);
   margin: 0 auto;
@@ -254,6 +396,7 @@ body {
   color: var(--accent-terracotta);
   text-decoration: underline;
   text-underline-offset: 3px;
+  overflow-wrap: anywhere;
 }
 .prose a:hover {
   color: var(--ink-primary);
@@ -282,6 +425,10 @@ body {
   border-radius: var(--radius-sm);
   padding: 0.15em 0.35em;
 }
+.prose p code,
+.prose li code {
+  overflow-wrap: anywhere;
+}
 .prose pre {
   margin: 1.5rem 0;
   padding: 1rem 1.25rem;
@@ -292,6 +439,7 @@ body {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   line-height: 1.5;
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
 }
 .prose pre code {
   background: none;
@@ -299,8 +447,14 @@ body {
   padding: 0;
   font-size: inherit;
 }
+.prose pre code span {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+}
 .prose table {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   border-collapse: collapse;
   margin: 1.5rem 0;
   font-size: 0.95rem;

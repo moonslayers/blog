@@ -83,7 +83,8 @@ Mínimas: `shadow-sm: 0 1px 2px rgba(0,0,0,0.04)`; `shadow-focus: 0 0 0 2px var(
 
 - Artículo (prosa): `68ch`.
 - Shell/índice: `1100px`.
-- Columna de posts en home: `720px` centrada.
+- Home: composición de `960px` centrada en el shell `1100px`, sin rail lateral; hero alineado a la composición con intro limitado a `68ch`; lista a ancho completo de la composición y banda inferior en 2 columnas; en `<=1024px` la banda colapsa a 1 columna.
+- Grid de post cards (archivo, etiqueta): a ancho del shell `1100px`, 2 columnas con `repeat(auto-fit, minmax(min(100%, 340px), 1fr))`; con 1 solo post se limita a `minmax(0, 640px)` centrado; en `<=700px` 1 columna.
 
 ### Breakpoints
 
@@ -91,7 +92,7 @@ Mínimas: `shadow-sm: 0 1px 2px rgba(0,0,0,0.04)`; `shadow-focus: 0 0 0 2px var(
 
 ## 4. Reglas tipográficas
 
-- Medidas: body 16px; display hasta 56px. No texto por debajo de 14px.
+- Medidas: body 16px; display hasta 56px. El texto de lectura no baja de 14px; la metadata mono auxiliar (footer, captions) puede usar 0.75rem con tracking positivo leve.
 - Line-height body 1.65; headings 1.05–1.3.
 - Tracking negativo solo en display/headings; mono con tracking positivo leve.
 - Serif (Fraunces) para headings, títulos de post, citas y pull quotes. Sans (Inter) para cuerpo y UI. Mono para metadata, fechas, tags, código.
@@ -103,32 +104,42 @@ Mínimas: `shadow-sm: 0 1px 2px rgba(0,0,0,0.04)`; `shadow-focus: 0 0 0 2px var(
 
 ## 5. Componentes
 
-- **Header:** logo "Espacio Latente" en Fraunces; nav (Inicio, Etiquetas, Búsqueda, Sobre mí); altura 64px; borde inferior hairline; sticky.
+- **Header:** sticky, borde inferior hairline, sin sombras; logo "Espacio Latente" en Fraunces; una sola nav con 5 enlaces (Inicio, Etiquetas, Buscar, RSS, Portafolio — externo en pestaña nueva); control de tema cíclico (44×44px); altura 64px en desktop. En `<=768px` el header es una sola fila compacta de 60px (marca con ellipsis + tema + hamburguesa de 44×44px, sin wrap) y la nav vive en un único panel superpuesto bajo el header (no empuja el contenido): botón con `aria-expanded`/`aria-controls` y etiqueta abrir/cerrar, cierre con Escape, clic/tap fuera y al pasar a desktop, retorno de foco al botón y navegación por teclado; sin JS la hamburguesa queda oculta y la nav se muestra en flujo como dos filas.
 - **Footer:** copyright, enlaces (RSS, GitHub, portfolio), mono small.
-- **Home hero:** H1 "Espacio Latente" + tagline + deck corto; max 68ch.
-- **Post card:** cover 16:9 arriba, fecha (mono), título (serif), deck, meta (tiempo de lectura, tags), tags chips. Lista vertical, no grid infinito.
-- **Tag chip:** mono small, borde 1px, radius 4px, padding 2px 8px; hover accent.
+- **Home hero:** kicker mono con tagline + H1-tesis "Orquestando ideas, delegando propósitos" en Fraunces display; el nombre del blog vive solo en el header y el `<title>`; sin intro largo ni quicknav (la nav está en el header); hero max `960px` centrado.
+- **Featured post:** layout split texto + portada 16:9; eyebrow mono "Destacado" en mayúsculas; h2 serif con link; deck; meta mono (fecha, tiempo de lectura); en móvil portada arriba.
+- **Post row:** fila con texto a la izquierda + miniatura 16:9 de 200px a la derecha (132px en `<=768px`, 112px en `<=480px`); fecha mono + título serif h3 con link + meta mono (tiempo de lectura); sin deck; hairline superior; se apila en móvil; no hay rail lateral, la fila usa todo el ancho de la composición (960px).
+- **Topic strip:** franja de temas con h2 "Temas" y lista de chips con conteo; curada a 6 visibles.
+- **Post card:** cover 16:9 arriba, fecha (mono), título (serif), deck, meta (tiempo de lectura, tags), tags chips. Se usa en archivo y listados por etiqueta, no en la home.
+- **Tag chip:** estilo compartido en `global.css` (`.tag-chip`, `.tag-chip__count`); mono small, borde 1px, radius 4px, padding 2px 8px; hover accent.
 - **Botón/link:** links color accent con underline en hover; botones radius 8px, padding 8px 16px, bg accent, texto accent-contrast.
 - **Prosa:** max 68ch, Inter, párrafos con margin-bottom 16px, listas con indent 24px.
 - **Bloque de código:** JetBrains Mono, code-bg, borde 1px, radius 8px, padding 16px, scroll horizontal, sin sombras.
 - **Tabla:** hairlines 1px, header bold, padding 8px 12px, sin zebra.
 - **Figura + caption:** imagen (16:9 o natural), caption small muted, centrado debajo.
-- **Share row:** enlaces (X, LinkedIn, copiar enlace) en mono small, separados por `·`? Usar comas o `|`; no usar `·` (renderiza mal en T1). Aquí web: usar `·` está bien en HTML, pero preferir `|`.
+- **Share row:** cinco acciones en este orden (WhatsApp, X, LinkedIn, Facebook, Copiar enlace); cada acción es un chip con icono + etiqueta corta en mono small; separación mediante `gap` y `flex-wrap`, sin separadores `·` ni `|`; altura mínima de target 44px, radio 4px, borde hairline; hover: texto a `--ink-primary` y borde/icono a `--accent-terracotta` (no usar terracota como color de texto por contraste); los enlaces abren la app/web correspondiente en pestaña nueva con `rel="noopener noreferrer"`.
 - **Buscador:** input con borde 1px, radius 4px, padding 8px 12px; resultados como lista de post cards compactas; estado vacío con mensaje y sugerencias.
-- **Paginación:** no en MVP.
+- **Paginación:** en archivo, 10 posts por página con enlaces anterior/siguiente.
 - **404:** mensaje claro + enlace a inicio.
 
 ## 6. Layouts
 
-- **Home:** shell 1100px; hero max 68ch; lista vertical de post cards max 720px centrada; footer.
+- **Home:** hero `960px` centrado (kicker + H1-tesis) → destacado full-width split (`960px` centrado) → lista "Últimos artículos" a ancho completo (`960px`, hasta 2 filas + CTA al archivo) → banda inferior `960px` con separador superior (`Temas`, hasta 6 chips, + "Sobre este blog") en grid de 2 columnas `1.5fr / 1fr`; sin rail lateral ni bloque "Explorar"; casos: sin posts solo hero + mensaje vacío (sin lista ni banda si no hay tags); 1 post destacado + banda sin lista; en `<=1024px` la banda colapsa a 1 columna; footer.
 - **Artículo:** header; cover 16:9 opcional; título + deck + meta; prosa 68ch centrada; tags; share row; footer.
+- **Archivo:** título "Artículos"; grid de post cards a ancho completo del shell (2 columnas, auto-fit con mínimo 340px); con 1 solo post se limita a `minmax(0, 640px)` centrado; paginación.
 - **Índice de etiquetas:** lista de tags con conteo, envueltos en chips; shell 1100px.
-- **Tag:** título "Etiqueta: X"; lista de posts filtrados.
+- **Tag:** título "Etiqueta: X"; grid de post cards filtrados a ancho completo del shell (2 columnas, auto-fit con mínimo 340px); con 1 solo post se limita a `minmax(0, 640px)` centrado.
 - **Búsqueda:** input destacado + resultados + estado vacío.
 
 ## 7. Dark mode
 
-- Activación automática vía `prefers-color-scheme: dark`. Sin toggle manual en MVP.
+- Tres estados: claro, oscuro y sistema. Precedencia: elección explícita del usuario > `prefers-color-scheme`.
+- Persistencia en `localStorage` con clave `blog:theme`, valores `"light" | "dark" | "system"` (ausente = sistema).
+- El modo se aplica con `data-theme="light" | "dark"` en `<html>`; en modo sistema no se escribe el atributo y manda el SO.
+- Resolución antes del primer paint con un script inline en `<head>` para evitar flash.
+- Tokens de color declarados una sola vez con `light-dark(claro, oscuro)` y `color-scheme`; sin bloque `@media (prefers-color-scheme: dark)`.
+- Control: botón cíclico en el header (claro → oscuro → sistema), 44×44px, con iconos `Sun`, `Moon`, `Monitor` de `@lucide/astro` (trazo 1.5, `currentColor`).
+- Bloques de código: Shiki con temas duales claro/oscuro y fondo con el token `--code-bg`.
 - Cambia: bg, surface, text, muted, border, accent (aclarado), code-bg, success/warning.
 - No cambia: tipografía, espaciado, radios, anchos, jerarquía, layout.
 - Contraste: texto principal ≥ 4.5:1; texto grande ≥ 3:1; accent sobre bg ≥ 4.5:1 en ambos modos.
@@ -148,7 +159,8 @@ Mínimas: `shadow-sm: 0 1px 2px rgba(0,0,0,0.04)`; `shadow-focus: 0 0 0 2px var(
 - Skip link al contenido principal.
 - Landmarks: `header`, `main`, `footer`, `nav`.
 - Alt text descriptivo en imágenes; decorativas con `alt=""`.
-- Navegación por teclado completa; targets mínimos 44×44px.
+- Navegación por teclado completa; targets mínimos 44×44px (en móvil, chips de etiqueta y enlaces del footer alcanzan 44px efectivos mediante área táctil extendida invisible, sin cambiar su densidad visual).
+- Anclas y skip link con compensación de scroll bajo el header sticky (`scroll-padding-top`); safe areas (`viewport-fit=cover`, `env()`) y gutter móvil del shell de 16px.
 - Idioma `lang="es"`.
 
 ## 10. Imágenes y OG
@@ -161,14 +173,17 @@ Mínimas: `shadow-sm: 0 1px 2px rgba(0,0,0,0.04)`; `shadow-focus: 0 0 0 2px var(
 
 ## 11. Anti-patrones
 
-Visuales: gradientes, glassmorphism, sombras dramáticas, grids infinitos de cards, más de un acento para links, drop caps, animaciones decorativas, parallax.
+Visuales: gradientes, glassmorphism, sombras dramáticas, grids infinitos de cards sin curación (una franja de temas curada o un único destacado no son grids infinitos), más de un acento para links, drop caps, animaciones decorativas, parallax.
 
 Editoriales: clickbait, emojis en títulos, "revolucionario/game-changer", porcentajes no medidos, afirmaciones sin fuente, corporativismo, más de 3 niveles de heading.
 
 ## 12. Checklist de implementación
 
 - [ ] Tokens definidos en `global.css` con nombres exactos.
-- [ ] Dark mode vía `prefers-color-scheme`, sin toggle.
+- [ ] Tema en tres estados (claro, oscuro, sistema) con persistencia en `blog:theme`.
+- [ ] Sin flash al recargar en oscuro (resolución antes del primer paint).
+- [ ] El modo sistema responde al cambio del SO.
+- [ ] Bloques de código legibles en ambos modos.
 - [ ] Prosa max 68ch, shell max 1100px.
 - [ ] Tres familias tipográficas con roles correctos.
 - [ ] Un solo acento (terracotta) para links/acciones.
@@ -177,3 +192,5 @@ Editoriales: clickbait, emojis en títulos, "revolucionario/game-changer", porce
 - [ ] Portadas 16:9, OG 1200×630, fallback.
 - [ ] `prefers-reduced-motion` respetado.
 - [ ] Contraste AA verificado en ambos modos.
+- [ ] Share row con cinco acciones (WhatsApp, X, LinkedIn, Facebook, Copiar enlace), iconos + etiquetas, `gap`/`flex-wrap`, target 44px.
+- [ ] `npm run check:output` verifica cinco acciones por artículo y URLs compartidas absolutas con slash final.

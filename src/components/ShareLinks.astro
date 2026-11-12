@@ -1,62 +1,125 @@
 ---
+import { Check, Link } from "@lucide/astro";
+import BrandIcon from "./icons/BrandIcon.astro";
+
 interface Props {
   url: string;
   title: string;
 }
 
+const ICON_SIZE = 16;
+const ICON_STROKE_WIDTH = 1.5;
+
 const { url, title } = Astro.props;
 const encodedUrl = encodeURIComponent(url);
 const encodedTitle = encodeURIComponent(title);
+const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`;
 const xHref = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
 const linkedinHref = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
-const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}`;
+const facebookHref = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
 ---
 
-<div class="share-links">
+<div class="share-links" role="group" aria-label="Compartir este artículo">
   <a
-    href={xHref}
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Compartir en X"
-  >
-    X
-  </a>
-  <a
-    href={linkedinHref}
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Compartir en LinkedIn"
-  >
-    LinkedIn
-  </a>
-  <a
+    class="share-links__chip"
     href={whatsappHref}
     target="_blank"
     rel="noopener noreferrer"
     aria-label="Compartir en WhatsApp"
   >
-    WhatsApp
+    <BrandIcon name="whatsapp" size={ICON_SIZE} />
+    <span>WhatsApp</span>
+  </a>
+  <a
+    class="share-links__chip"
+    href={xHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en X"
+  >
+    <BrandIcon name="x" size={ICON_SIZE} />
+    <span>X</span>
+  </a>
+  <a
+    class="share-links__chip"
+    href={linkedinHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en LinkedIn"
+  >
+    <BrandIcon name="linkedin" size={ICON_SIZE} />
+    <span>LinkedIn</span>
+  </a>
+  <a
+    class="share-links__chip"
+    href={facebookHref}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Compartir en Facebook"
+  >
+    <BrandIcon name="facebook" size={ICON_SIZE} />
+    <span>Facebook</span>
   </a>
   <button
     type="button"
-    class="copy-link"
+    class="share-links__chip copy-link"
     data-url={url}
     aria-label="Copiar enlace"
   >
-    <span class="copy-label">Copiar link</span>
-    <span class="copy-status" aria-live="polite" hidden>
-      Copiado
+    <span class="share-links__icon" data-icon="link">
+      <Link
+        size={ICON_SIZE}
+        stroke-width={ICON_STROKE_WIDTH}
+        aria-hidden="true"
+      />
     </span>
+    <span class="share-links__icon" data-icon="check" hidden>
+      <Check
+        size={ICON_SIZE}
+        stroke-width={ICON_STROKE_WIDTH}
+        aria-hidden="true"
+      />
+    </span>
+    <span class="copy-label">Copiar enlace</span>
+    <span class="copy-status visually-hidden" aria-live="polite"></span>
   </button>
 </div>
 
 <script>
+  const COPY_RESET_MS = 2000;
+
   document.querySelectorAll<HTMLButtonElement>(".copy-link").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const url = btn.getAttribute("data-url");
       if (!url) return;
       const label = btn.querySelector<HTMLElement>(".copy-label");
       const status = btn.querySelector<HTMLElement>(".copy-status");
+      const linkIcon = btn.querySelector<HTMLElement>('[data-icon="link"]');
+      const checkIcon = btn.querySelector<HTMLElement>('[data-icon="check"]');
+
+      function showCheck(): void {
+        if (linkIcon) linkIcon.hidden = true;
+        if (checkIcon) checkIcon.hidden = false;
+      }
+
+      function showLinkIcon(): void {
+        if (linkIcon) linkIcon.hidden = false;
+        if (checkIcon) checkIcon.hidden = true;
+      }
+
+      function showStatusMessage(message: string): void {
+        if (!status) return;
+        status.textContent = message;
+        status.classList.add("visually-hidden");
+        status.classList.remove("copy-status--visible");
+      }
+
+      function showStatusUrl(value: string): void {
+        if (!status) return;
+        status.textContent = value;
+        status.classList.remove("visually-hidden");
+        status.classList.add("copy-status--visible");
+      }
 
       let copied = false;
       if (
@@ -73,24 +136,89 @@ const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`
 
       if (copied) {
         if (label) label.textContent = "Copiado";
-        if (status) {
-          status.textContent = "Copiado";
-          status.hidden = false;
-        }
+        showCheck();
+        showStatusMessage("Copiado");
         window.setTimeout(() => {
-          if (label) label.textContent = "Copiar link";
-          if (status) {
-            status.textContent = "Copiado";
-            status.hidden = true;
-          }
-        }, 2000);
+          if (label) label.textContent = "Copiar enlace";
+          showLinkIcon();
+          showStatusMessage("");
+        }, COPY_RESET_MS);
       } else {
         if (label) label.textContent = "Copiar manualmente";
-        if (status) {
-          status.textContent = url;
-          status.hidden = false;
-        }
+        showStatusUrl(url);
       }
     });
   });
 </script>
+
+<style>
+  .share-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .share-links__chip {
+    font: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+    background-color: transparent;
+    border: var(--border-thin);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition:
+      color 120ms ease-in-out,
+      border-color 120ms ease-in-out;
+  }
+  button.share-links__chip {
+    cursor: pointer;
+  }
+  .share-links__chip:hover {
+    color: var(--ink-primary);
+    border-color: var(--accent-terracotta);
+  }
+  .share-links__chip:hover svg {
+    color: var(--accent-terracotta);
+  }
+  .share-links__icon:not([hidden]) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .copy-status--visible {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    max-width: min(100%, 16rem);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .share-links__chip {
+      transition-duration: 0ms;
+    }
+  }
+</style>

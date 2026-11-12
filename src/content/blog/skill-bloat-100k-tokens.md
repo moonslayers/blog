@@ -6,6 +6,7 @@ tags: ["agentes", "skills", "contexto", "ia", "opencode"]
 cover: /images/posts/skill-bloat.jpg
 coverAlt: "Pila de documentos con decenas de post-its de colores en los bordes"
 author: "Jorge Marquez"
+featured: true
 ---
 
 Mi agente cargó más de 100 mil tokens de contexto en skills, esto hice para arreglarlo.

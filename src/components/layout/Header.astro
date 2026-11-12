@@ -1,6 +1,11 @@
 ---
+import { Menu, X } from "@lucide/astro";
 import { SITE_TITLE, PORTFOLIO_URL } from "../../consts";
 import { withBase } from "../../lib/url";
+import ThemeToggle from "./ThemeToggle.astro";
+
+const ICON_SIZE = 20;
+const ICON_STROKE_WIDTH = 1.5;
 
 const nav = [
   { href: withBase("/"), label: "Inicio" },
@@ -11,31 +16,115 @@ const nav = [
 const portfolioHref = PORTFOLIO_URL;
 ---
 
-<header class="site-header">
+<header class="site-header" data-site-header>
   <div class="site-header__bar">
     <a href={withBase("/")} class="site-header__brand">
       {SITE_TITLE}
     </a>
-    <nav class="site-header__nav" aria-label="Navegación principal">
-      <ul>
-        {nav.map((item) => (
+    <div class="site-header__actions">
+      <nav
+        class="site-header__nav"
+        id="site-nav"
+        aria-label="Navegación principal"
+      >
+        <ul>
+          {nav.map((item) => (
+            <li>
+              <a href={item.href} class="site-header__link">
+                {item.label}
+              </a>
+            </li>
+          ))}
           <li>
-            <a href={item.href} class="site-header__link">
-              {item.label}
+            <a
+              href={portfolioHref}
+              class="site-header__link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Portafolio
             </a>
           </li>
-        ))}
-        <li>
-          <a
-            href={portfolioHref}
-            class="site-header__link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Portafolio
-          </a>
-        </li>
-      </ul>
-    </nav>
+        </ul>
+      </nav>
+      <ThemeToggle />
+      <button
+        type="button"
+        class="site-header__menu-button"
+        data-menu-button
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Abrir menú de navegación"
+        hidden
+      >
+        <span class="site-header__menu-icon" data-menu-icon="open">
+          <Menu
+            size={ICON_SIZE}
+            stroke-width={ICON_STROKE_WIDTH}
+            aria-hidden="true"
+          />
+        </span>
+        <span class="site-header__menu-icon" data-menu-icon="close">
+          <X
+            size={ICON_SIZE}
+            stroke-width={ICON_STROKE_WIDTH}
+            aria-hidden="true"
+          />
+        </span>
+      </button>
+    </div>
   </div>
 </header>
+
+<script>
+  const header = document.querySelector("[data-site-header]");
+  const button = document.querySelector("[data-menu-button]");
+
+  if (header instanceof HTMLElement && button instanceof HTMLButtonElement) {
+    const headerEl: HTMLElement = header;
+    const buttonEl: HTMLButtonElement = button;
+    const LABEL_OPEN = "Abrir menú de navegación";
+    const LABEL_CLOSE = "Cerrar menú de navegación";
+    const mobile = window.matchMedia("(max-width: 768px)");
+
+    function isOpen(): boolean {
+      return headerEl.hasAttribute("data-menu-open");
+    }
+
+    function setOpen(open: boolean): void {
+      if (open) {
+        headerEl.setAttribute("data-menu-open", "");
+      } else {
+        headerEl.removeAttribute("data-menu-open");
+      }
+      buttonEl.setAttribute("aria-expanded", String(open));
+      buttonEl.setAttribute("aria-label", open ? LABEL_CLOSE : LABEL_OPEN);
+    }
+
+    buttonEl.removeAttribute("hidden");
+    headerEl.setAttribute("data-menu-ready", "");
+    setOpen(false);
+
+    buttonEl.addEventListener("click", () => {
+      setOpen(!isOpen());
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!isOpen()) return;
+      if (event.target instanceof Node && !headerEl.contains(event.target)) {
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isOpen()) {
+        setOpen(false);
+        buttonEl.focus();
+      }
+    });
+
+    mobile.addEventListener("change", (event) => {
+      if (!event.matches) setOpen(false);
+    });
+  }
+</script>

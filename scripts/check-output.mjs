@@ -66,6 +66,55 @@ for (const a of articles) {
     /<meta property="og:image:height" content="([^"]+)"/,
   )?.[1];
   if (w !== "1200" || h !== "630") fail(`${a}: dimensiones OG no son 1200/630`);
+  if (
+    !html.includes('role="group"') ||
+    !html.includes('aria-label="Compartir este artículo"')
+  ) {
+    fail(`${a}: fila de compartir sin role="group" o sin etiqueta accesible`);
+  }
+  const slug = a.match(/articulos\/([^/]+)\//)?.[1] ?? "";
+  const encodedPath = `%2Fblog%2Farticulos%2F${slug}%2F`;
+  const shareLinks = [
+    ["WhatsApp", "wa.me", /<a[^>]*href="(https:\/\/wa\.me\/[^"]*)"[^>]*>/],
+    [
+      "X",
+      "twitter.com/intent/tweet",
+      /<a[^>]*href="(https:\/\/(?:www\.)?(?:twitter\.com\/intent\/tweet|x\.com\/intent\/post)[^"]*)"[^>]*>/,
+    ],
+    [
+      "LinkedIn",
+      "linkedin.com/sharing/share-offsite",
+      /<a[^>]*href="(https:\/\/www\.linkedin\.com\/sharing\/share-offsite[^"]*)"[^>]*>/,
+    ],
+    [
+      "Facebook",
+      "facebook.com/sharer/sharer.php",
+      /<a[^>]*href="(https:\/\/www\.facebook\.com\/sharer\/sharer\.php[^"]*)"[^>]*>/,
+    ],
+  ];
+  for (const [name, marker, pattern] of shareLinks) {
+    const href = html.match(pattern)?.[1];
+    if (!href || !href.includes(marker)) {
+      fail(`${a}: fila de compartir sin enlace a ${marker}`);
+      continue;
+    }
+    const decoded = href.replace(/&amp;/g, "&");
+    if (!decoded.includes("https%3A%2F%2F") || !decoded.includes(encodedPath)) {
+      fail(
+        `${a}: enlace de ${name} sin URL absoluta al artículo con slash final`,
+      );
+    }
+  }
+  const copyUrl = html.match(/<button[^>]*data-url="([^"]+)"[^>]*>/)?.[1];
+  if (!copyUrl) {
+    fail(`${a}: fila de compartir sin botón de copiar con data-url`);
+  } else if (
+    !/^https:\/\//.test(copyUrl) ||
+    !copyUrl.includes(`/blog/articulos/${slug}/`) ||
+    !copyUrl.endsWith("/")
+  ) {
+    fail(`${a}: botón de copiar sin URL absoluta al artículo con slash final`);
+  }
 }
 
 // buscar-index.json

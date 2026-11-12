@@ -1,0 +1,116 @@
+---
+import type { BlogPost } from "../lib/posts";
+import { coverFor, formatDate, readingTime, postPath } from "../lib/posts";
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const cover = coverFor(post);
+---
+
+<article class="post-row">
+  <div class="post-row__body">
+    <p class="post-row__meta">
+      <time datetime={post.data.date.toISOString()}>
+        {formatDate(post.data.date)}
+      </time>
+      <span aria-hidden="true">|</span>
+      <span>{readingTime(post.body)} min de lectura</span>
+    </p>
+    <h3 class="post-row__title">
+      <a href={postPath(post.id)}>{post.data.title}</a>
+    </h3>
+  </div>
+  <div class="post-row__thumb" aria-hidden="true">
+    <img
+      src={cover.src}
+      alt={post.data.coverAlt ?? post.data.title}
+      width="1200"
+      height="630"
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+</article>
+
+<style>
+  .post-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--space-6);
+    align-items: center;
+    border-top: var(--border-thin);
+    padding: var(--space-4) 0;
+  }
+  .post-row__body {
+    min-width: 0;
+  }
+  .post-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--ink-secondary);
+  }
+  .post-row__title {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.5rem);
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+  }
+  .post-row__title a {
+    color: var(--ink-primary);
+    text-decoration: none;
+    transition: color 120ms ease-in-out;
+  }
+  .post-row__title a:hover {
+    color: var(--accent-terracotta);
+  }
+  .post-row__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .post-row__thumb {
+    display: block;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: var(--border-thin);
+    background: var(--bg-surface);
+    pointer-events: none;
+  }
+  .post-row__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 768px) {
+    .post-row {
+      grid-template-columns: minmax(0, 1fr) 132px;
+    }
+  }
+  @media (max-width: 480px) {
+    .post-row {
+      grid-template-columns: minmax(0, 1fr) 112px;
+      gap: var(--space-3);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post-row__title a {
+      transition-duration: 0ms;
+    }
+  }
+</style>
