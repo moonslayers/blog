@@ -1,14 +1,25 @@
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { withBase, absoluteUrl } from "./url";
+import { normalizeText, tagSlug, readingTime, isExternalUrl } from "./text";
 
 export type BlogPost = CollectionEntry<"blog">;
 
+export type SearchEntry = {
+  title: string;
+  description: string;
+  tags: string[];
+  date: string;
+  readingTime: number;
+  url: string;
+  searchText: string;
+};
+
 export async function getPublishedPosts(): Promise<BlogPost[]> {
-  const entries = await getCollection(
-    "blog",
-    ({ data }) => data.draft !== true,
-  );
+  const today = new Date();
+  const entries = await getCollection("blog", ({ data }) => {
+    return data.draft !== true && data.date <= today;
+  });
   return entries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 }
 
@@ -19,43 +30,31 @@ export async function getPostBySlug(
   return posts.find((post) => post.id === slug);
 }
 
-export async function getAdjacentPosts(slug: string): Promise<{
+export async function getAdjacentPosts(
+  slug: string,
+  posts?: BlogPost[],
+): Promise<{
   previous: BlogPost | null;
   next: BlogPost | null;
 }> {
-  const posts = await getPublishedPosts();
-  const index = posts.findIndex((post) => post.id === slug);
+  const resolved = posts ?? (await getPublishedPosts());
+  const index = resolved.findIndex((post) => post.id === slug);
   if (index === -1) {
     return { previous: null, next: null };
   }
   return {
-    previous: index + 1 < posts.length ? posts[index + 1] : null,
-    next: index - 1 >= 0 ? posts[index - 1] : null,
+    previous: index + 1 < resolved.length ? resolved[index + 1] : null,
+    next: index - 1 >= 0 ? resolved[index - 1] : null,
   };
 }
 
-export function readingTime(body?: string): number {
-  const words = body ? body.trim().split(/\s+/).filter(Boolean).length : 0;
-  return Math.max(1, Math.ceil(words / 200));
-}
-
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat("es-MX", {
-    dateStyle: "long",
-    timeZone: "UTC",
-  }).format(date);
-}
-
-export function tagSlug(tag: string): string {
-  return tag
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+export {
+  normalizeText,
+  tagSlug,
+  readingTime,
+  formatDate,
+  isExternalUrl,
+} from "./text";
 
 export async function getAllTags(): Promise<
   { tag: string; slug: string; count: number }[]
@@ -84,29 +83,14 @@ export function postPath(slug: string): string {
 
 export function coverFor(post: BlogPost): { src: string; absolute: string } {
   const cover = post.data.cover;
-  if (cover && (cover.startsWith("http://") || cover.startsWith("https://"))) {
+  if (cover && isExternalUrl(cover)) {
     return { src: cover, absolute: cover };
   }
   const path = cover && cover.startsWith("/") ? cover : "/og-default.png";
   return { src: withBase(path), absolute: absoluteUrl(path) };
 }
 
-function normalize(text: string): string {
-  return text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-export function searchIndexEntry(post: BlogPost): {
-  title: string;
-  description: string;
-  tags: string[];
-  date: string;
-  readingTime: number;
-  url: string;
-  searchText: string;
-} {
+export function searchIndexEntry(post: BlogPost): SearchEntry {
   return {
     title: post.data.title,
     description: post.data.description,
@@ -114,7 +98,7 @@ export function searchIndexEntry(post: BlogPost): {
     date: post.data.date.toISOString(),
     readingTime: readingTime(post.body),
     url: postPath(post.id),
-    searchText: normalize(
+    searchText: normalizeText(
       `${post.data.title} ${post.data.description} ${post.data.tags.join(" ")}`,
     ),
   };

@@ -29,10 +29,15 @@ El diseño está gobernado por `DESIGN.md`.
 ```bash
 npm ci
 npm run check
+npm test
 npm run build
+npm run check:output
 npx prettier --check .
 npm run preview
 ```
+
+- Los posts con fecha futura se filtran en `getPublishedPosts` (`src/lib/posts.ts`) y no aparecen hasta el siguiente build (cron diario 06:00 UTC).
+- No commitear `dist/` ni `.astro/` (están en `.gitignore`).
 
 ## Rutas
 

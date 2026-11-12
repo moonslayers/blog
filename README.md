@@ -17,6 +17,8 @@ npm run dev          # servidor dev en localhost:4321
 npm run build        # build a ./dist/
 npm run preview      # preview del build
 npm run check        # astro check (tipos)
+npm test             # vitest
+npm run check:output # valida dist/
 npx prettier --check .  # verificación de formato
 ```
 
@@ -24,7 +26,15 @@ Node 22.23.4 (ver `.nvmrc`).
 
 ## Publicación
 
-El despliegue se realiza mediante `.github/workflows/deploy.yml` (push a `main` o ejecución manual). El artefacto se genera en `dist/` y se publica en GitHub Pages.
+El despliegue se realiza mediante `.github/workflows/deploy.yml` (push a `main`, ejecución manual o cron diario a las 06:00 UTC). El artefacto se genera en `dist/` y se publica en GitHub Pages. Los posts con fecha futura se filtran en `getPublishedPosts` y aparecen en el siguiente build/cron. No commitear `dist/`.
+
+## Paginación
+
+El índice `/articulos/` pagina de 10 en 10 (`src/pages/articulos/[...page].astro`). La primera página es `/articulos/`; las siguientes `/articulos/2/`, etc. Muestra "Página X de Y" y enlaces anterior/siguiente.
+
+## Búsqueda y noindex
+
+`/buscar/` y `/404/` emiten `<meta name="robots" content="noindex, follow">` y se excluyen del sitemap. El SEO vive en `BaseLayout`/`PostLayout` (no existe `src/lib/seo.ts`).
 
 ## Estructura
 

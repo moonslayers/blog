@@ -6,7 +6,7 @@ import { statSync } from "node:fs";
 import { join } from "node:path";
 
 export async function GET(context: APIContext) {
-  const posts = await getPublishedPosts();
+  const posts = (await getPublishedPosts()).slice(0, 20);
   const siteBase = new URL(import.meta.env.BASE_URL, context.site!).toString();
   return rss({
     title: "Espacio Latente",
@@ -53,7 +53,6 @@ export async function GET(context: APIContext) {
         description: post.data.description,
         pubDate: post.data.date,
         link: new URL(postPath(post.id), context.site!).href,
-        author: "Jorge Marquez",
         categories: post.data.tags,
         ...(enclosure ? { enclosure } : {}),
       };

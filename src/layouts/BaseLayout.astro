@@ -14,6 +14,7 @@ interface Props {
   ogImage?: string;
   ogType?: string;
   twitterCard?: string;
+  noindex?: boolean;
 }
 
 const {
@@ -25,10 +26,22 @@ const {
   ogImage,
   ogType = "website",
   twitterCard = "summary_large_image",
+  noindex = false,
 } = Astro.props;
 
 const site = Astro.site ?? new URL("https://moonslayers.github.io");
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, site).toString();
+const isHome =
+  Astro.url.pathname.replace(/\/+$/, "/") ===
+  withBase("/").replace(/\/+$/, "/");
+const suffix = ` — ${SITE_TITLE}`;
+const documentTitle = isHome
+  ? SITE_TITLE
+  : title && title.endsWith(suffix)
+    ? title
+    : title === SITE_TITLE
+      ? SITE_TITLE
+      : `${title}${suffix}`;
 const resolvedOgTitle = ogTitle ?? title;
 const resolvedOgDescription = ogDescription ?? description;
 const resolvedOgImage =
@@ -44,9 +57,10 @@ const faviconSvg = withBase("/favicon.svg");
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <title>{documentTitle}</title>
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
 
     <link rel="icon" type="image/svg+xml" href={faviconSvg} />
 

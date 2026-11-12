@@ -2,20 +2,33 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import PostCard from "../../components/PostCard.astro";
 import { getAllTags, getPublishedPosts, tagSlug } from "../../lib/posts";
+import type { BlogPost } from "../../lib/posts";
 import { withBase } from "../../lib/url";
 
 export async function getStaticPaths() {
   const tags = await getAllTags();
+  const posts = await getPublishedPosts();
   return tags.map((item) => ({
     params: { tag: item.slug },
-    props: { tag: item.tag, slug: item.slug, count: item.count },
+    props: {
+      tag: item.tag,
+      slug: item.slug,
+      count: item.count,
+      posts: posts.filter((post) =>
+        post.data.tags.some((t) => tagSlug(t) === item.slug),
+      ),
+    },
   }));
 }
 
-const { tag, slug, count } = Astro.props;
-const posts = (await getPublishedPosts()).filter((post) =>
-  post.data.tags.some((t) => tagSlug(t) === slug),
-);
+interface Props {
+  tag: string;
+  slug: string;
+  count: number;
+  posts: BlogPost[];
+}
+
+const { tag, count, posts } = Astro.props;
 ---
 
 <BaseLayout title={`Etiqueta: ${tag}`}>

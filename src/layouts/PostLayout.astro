@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
-import { SITE_TITLE } from "../consts";
 import { withBase, absoluteUrl } from "../lib/url";
 import { readingTime, tagSlug, coverFor, postPath } from "../lib/posts";
 import type { BlogPost } from "../lib/posts";
@@ -38,7 +37,7 @@ const jsonLdStr = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
 ---
 
 <BaseLayout
-  title={`${post.data.title} — ${SITE_TITLE}`}
+  title={post.data.title}
   description={post.data.description}
   canonical={canonical}
   ogType="article"

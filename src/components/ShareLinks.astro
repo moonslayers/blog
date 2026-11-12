@@ -51,31 +51,46 @@ const whatsappHref = `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`
 </div>
 
 <script>
-  document.querySelectorAll(".copy-link").forEach((btn) => {
+  document.querySelectorAll<HTMLButtonElement>(".copy-link").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const url = btn.getAttribute("data-url");
       if (!url) return;
-      try {
-        await navigator.clipboard.writeText(url);
-      } catch {
-        const ta = document.createElement("textarea");
-        ta.value = url;
-        ta.setAttribute("readonly", "");
-        ta.style.position = "absolute";
-        ta.style.left = "-9999px";
-        document.body.appendChild(ta);
-        ta.select();
-        (document as any).execCommand("copy");
-        document.body.removeChild(ta);
+      const label = btn.querySelector<HTMLElement>(".copy-label");
+      const status = btn.querySelector<HTMLElement>(".copy-status");
+
+      let copied = false;
+      if (
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText === "function"
+      ) {
+        try {
+          await navigator.clipboard.writeText(url);
+          copied = true;
+        } catch {
+          copied = false;
+        }
       }
-      const label = btn.querySelector(".copy-label");
-      const status = btn.querySelector(".copy-status");
-      if (label) label.textContent = "Copiado";
-      if (status) (status as HTMLElement).hidden = false;
-      window.setTimeout(() => {
-        if (label) label.textContent = "Copiar link";
-        if (status) (status as HTMLElement).hidden = true;
-      }, 2000);
+
+      if (copied) {
+        if (label) label.textContent = "Copiado";
+        if (status) {
+          status.textContent = "Copiado";
+          status.hidden = false;
+        }
+        window.setTimeout(() => {
+          if (label) label.textContent = "Copiar link";
+          if (status) {
+            status.textContent = "Copiado";
+            status.hidden = true;
+          }
+        }, 2000);
+      } else {
+        if (label) label.textContent = "Copiar manualmente";
+        if (status) {
+          status.textContent = url;
+          status.hidden = false;
+        }
+      }
     });
   });
 </script>
